@@ -24,6 +24,8 @@ public class Connect extends AppCompatActivity {
     BluetoothDevice bt;
     BluetoothAdapter btAdap;
     TextView txtdevice, txtaddr;
+    BluetoothSocket mSocket;
+    BluetoothCommunicate comm;
     private boolean connected = false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,6 +60,32 @@ public class Connect extends AppCompatActivity {
         ConnectThread t = new ConnectThread(bt, this, btAdap);
         t.start();
         */
+    }
+
+    public void Communicate(View view){
+        if(connected){
+            comm = new BluetoothCommunicate(mSocket, view);
+            comm.write("a".getBytes());
+            comm.start();
+        }
+        else{
+            Toast.makeText(this, "Bluetooth not connected", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    public void Disconnect(View view){
+        comm.cancel();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        comm.cancel();
+        try {
+            mSocket.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private class ConnectThreadAsync extends AsyncTask<Void, Void, Boolean> {
@@ -99,6 +127,7 @@ public class Connect extends AppCompatActivity {
         protected void onPostExecute(Boolean aBoolean) {
             if(aBoolean){
                 connected = true;
+                mSocket = mmSocket;
                 Toast.makeText(mContext, "Connected", Toast.LENGTH_SHORT).show();
             }
             else {
