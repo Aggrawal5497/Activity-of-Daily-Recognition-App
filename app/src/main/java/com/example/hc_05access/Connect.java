@@ -64,7 +64,7 @@ public class Connect extends AppCompatActivity {
 
     public void Communicate(View view){
         if(connected){
-            comm = new BluetoothCommunicate(mSocket, view);
+            comm = new BluetoothCommunicate(mSocket, this);
             comm.write("a".getBytes());
             comm.start();
         }

@@ -1,6 +1,8 @@
 package com.example.hc_05access;
 
+import android.app.Activity;
 import android.bluetooth.BluetoothSocket;
+import android.content.Context;
 import android.os.Message;
 import android.util.Log;
 import android.view.View;
@@ -18,14 +20,14 @@ public class BluetoothCommunicate extends Thread {
     private InputStream mmInStream = null;
     private OutputStream mmOutStream = null;
     private byte[] mmBuffer;
-    private View mView;
-    private TextView mText;
     private boolean run = true;
+    private Activity mActivity;
+    private TextView disp;
 
-    BluetoothCommunicate(BluetoothSocket socket, View mainView){
+    BluetoothCommunicate(BluetoothSocket socket, Context context){
         mmSocket = socket;
-        mView = mainView;
-        mText = mView.findViewById(R.id.txtShow);
+        mActivity = (Activity) context;
+        disp = mActivity.findViewById(R.id.txtRecv);
 
         try {
             mmInStream = mmSocket.getInputStream();
@@ -52,10 +54,16 @@ public class BluetoothCommunicate extends Thread {
                     numBytes = mmInStream.read(mmBuffer);
                     if (numBytes == 9) {
                         str = new String(mmBuffer, StandardCharsets.UTF_8);
+                        final String finalStr = str;
+                        mActivity.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                disp.setText(finalStr);
+                            }
+                        });
                         Log.d("READ", str);
 
                         Thread.sleep(500);
-                        //mText.setText(numBytes + "");
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -67,9 +75,9 @@ public class BluetoothCommunicate extends Thread {
     }
 
     void write(byte[] bytes){
+
         try {
             mmOutStream.write(bytes);
-            //mText.setText("Written");
             Log.d("WRITE", "Written a");
         } catch (IOException e) {
             e.printStackTrace();
