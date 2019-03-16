@@ -3,9 +3,7 @@ package com.example.hc_05access;
 import android.app.Activity;
 import android.bluetooth.BluetoothSocket;
 import android.content.Context;
-import android.os.Message;
 import android.util.Log;
-import android.view.View;
 import android.widget.TextView;
 
 import java.io.IOException;
@@ -25,6 +23,10 @@ public class BluetoothCommunicate extends Thread {
     private Activity mActivity;
     private TextView disp1, disp2, disp3, disp4;
     private DataPreperation<Integer[]> dp;
+    private String finalStr;
+    private String[] val;
+    private Integer[] arr;
+    private Integer[] temp;
 
     BluetoothCommunicate(BluetoothSocket socket, Context context){
 
@@ -35,7 +37,9 @@ public class BluetoothCommunicate extends Thread {
         disp2 = (TextView) mActivity.findViewById(R.id.txt2);
         disp3 = (TextView) mActivity.findViewById(R.id.txt3);
         disp4 = (TextView) mActivity.findViewById(R.id.txtMain);
+        arr = new Integer[3];
 
+        temp = new Integer[3];
         try {
             mmInStream = mmSocket.getInputStream();
         } catch (IOException e) {
@@ -61,14 +65,27 @@ public class BluetoothCommunicate extends Thread {
                     numBytes = mmInStream.read(mmBuffer);
                     if (numBytes == 9) {
                         str = new String(mmBuffer, StandardCharsets.UTF_8);
-                        final String finalStr = str;
-                        final String[] val = finalStr.split(" ");
-                        final Integer[] arr = new Integer[val.length];
+                        finalStr = str;
+                        val = finalStr.split("[ \n]");
+                        Log.d("String length", val.length + "");
+                        Log.d("READ", str);
                         int i = 0;
-                        for(String s : val){
-                            arr[i] = Integer.parseInt(s.trim());
-                            i++;
+                        try{
+                            temp = arr;
+                            for(String s : val){
+                                arr[i] = Integer.parseInt(s.trim());
+                                i++;
+                                if(i == 3)
+                                    break;
+                            }
+                            if(val.length < 3)
+                                throw new Exception("abc");
                         }
+                        catch (Exception e){
+                            Log.d("EX", e.toString());
+                            arr = temp;
+                        }
+
                         dp.add(arr);
                         mActivity.runOnUiThread(new Runnable() {
                             @Override
@@ -81,9 +98,8 @@ public class BluetoothCommunicate extends Thread {
                                 }
                             }
                         });
-                        Log.d("READ", str);
 
-                        Thread.sleep(500);
+                        Thread.sleep(100);
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
