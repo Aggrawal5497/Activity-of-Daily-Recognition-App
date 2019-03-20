@@ -1,14 +1,17 @@
 package com.example.hc_05access;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.bluetooth.BluetoothSocket;
 import android.content.Context;
+import android.os.Build;
 import android.util.Log;
 import android.widget.TextView;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.logging.Handler;
@@ -21,22 +24,24 @@ public class BluetoothCommunicate extends Thread {
     private byte[] mmBuffer;
     private boolean run = true;
     private Activity mActivity;
-    private TextView disp1, disp2, disp3, disp4;
+    private TextView abc, disp1, disp2, disp3, disp4;
     private DataPreperation<Integer[]> dp;
     private String finalStr;
     private String[] val;
     private Integer[] arr;
     private Integer[] temp;
 
+
     BluetoothCommunicate(BluetoothSocket socket, Context context){
 
-        dp = new DataPreperation<Integer[]>(2);
+        dp = new DataPreperation<Integer[]>(100);
         mmSocket = socket;
         mActivity = (Activity) context;
         disp1 = (TextView) mActivity.findViewById(R.id.txt1);
         disp2 = (TextView) mActivity.findViewById(R.id.txt2);
         disp3 = (TextView) mActivity.findViewById(R.id.txt3);
         disp4 = (TextView) mActivity.findViewById(R.id.txtMain);
+        //abc.setText("bye");
         arr = new Integer[3];
 
         temp = new Integer[3];
@@ -52,11 +57,22 @@ public class BluetoothCommunicate extends Thread {
         }
     }
 
+    @TargetApi(Build.VERSION_CODES.O)
     public void run() {
         mmBuffer = new byte[9];
         int numBytes;
         String str;
+        int a = -1, j, k, l;
+        float[] value = new float[4];
+        final float[] b = new float[300];
 
+        Model_run m = new Model_run(mActivity.getAssets(), "Mymodel.pb");
+        if(a == 1){
+            abc.setText("Hello");
+        }
+        else{
+            //abc.setText("Bye");
+        }
         while(run) {
             while (true) {
                 if(!run)
@@ -87,17 +103,31 @@ public class BluetoothCommunicate extends Thread {
                         }
 
                         dp.add(arr);
+                        if(dp.getSize() == 100){
+                            Integer[][] lll = new Integer[100][3];
+                            lll = dp.toArray(lll);
+                            for(k = 0; k < 100; k++){
+                                for(l = 0; l < 3; l++){
+                                    b[0 + 1*(k + 100 * l)] = (float) lll[k][l];
+                                }
+                            }
+
+                            value = m.predict(b);
+                        }
+                        final float[] finalValue = value;
                         mActivity.runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
                                 disp1.setText(arr[0] + "");
                                 disp2.setText(arr[1] + "");
                                 disp3.setText(arr[2] + "");
-                                if(dp.size() == 2){
-                                    disp4.setText(Arrays.deepToString(get2dArray(dp)));
+                                if(dp.size() <= 100){
+                                    disp4.setText(finalValue[0] + "\n" + finalValue[1] + "\n" + finalValue[2] + "\n" + finalValue[3]);
+                                    //abc.setText(dp.getSize() + "");
                                 }
                             }
                         });
+
 
                         Thread.sleep(100);
                     }

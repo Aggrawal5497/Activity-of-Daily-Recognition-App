@@ -17,4 +17,8 @@ public class DataPreperation<K> extends ArrayList<K> {
         }
         return r;
     }
+
+    public int getSize(){
+        return size();
+    }
 }
