@@ -122,7 +122,7 @@ public class BluetoothCommunicate extends Thread {
                                 disp2.setText(arr[1] + "");
                                 disp3.setText(arr[2] + "");
                                 if(dp.size() <= 100){
-                                    disp4.setText("Brush_teeth : " + finalValue[0] + "\nComb_hair : " + finalValue[1] + "\nDrink_glass : " + finalValue[2] + "\nWalk : " + finalValue[3]);
+                                    disp4.setText("Brush_teeth      : " + finalValue[0] + "\nComb_hair : " + finalValue[1] + "\nDrink_glass : " + finalValue[2] + "\nWalk : " + finalValue[3]);
                                     //abc.setText(dp.getSize() + "");
                                 }
                             }
